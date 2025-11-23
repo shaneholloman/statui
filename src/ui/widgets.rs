@@ -42,9 +42,8 @@ pub fn render_table(frame: &mut Frame, app: &mut App) {
         .highlight_symbol(">> ")
         .row_highlight_style(Style::default().add_modifier(Modifier::REVERSED));
 
-    let area = centered_rect(99, 99, frame.area());
+    frame.render_stateful_widget(table, frame.area(), &mut app.table_state);
 
-    frame.render_stateful_widget(table, area, &mut app.table_state);
 }
 
 /// Return the endpoints as a vector of Rows to build the table.
@@ -103,7 +102,7 @@ pub fn render_welcome_message(frame: &mut Frame) {
 
     let paragraph = Paragraph::new(text)
         .block(Block::default().title("Welcome").borders(Borders::ALL))
-        .alignment(Alignment::Center); // Center the text
+        .alignment(Alignment::Center); 
 
     // We need to calculate a centered area to render this
     let area = centered_rect(60, 50, frame.area());

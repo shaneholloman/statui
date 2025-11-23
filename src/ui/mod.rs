@@ -1,3 +1,4 @@
+pub mod fx;
 mod widgets;
 
 use ratatui::prelude::*;

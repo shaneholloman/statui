@@ -29,6 +29,7 @@ async fn main() -> Result<()> {
     });
 
     let mut terminal = ratatui::init();
+
     let mut application = App::new(&conf.endpoints);
     let app_result = app::run_app(&mut application, &mut terminal, rx).await;
 
