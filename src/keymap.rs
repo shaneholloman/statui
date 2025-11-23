@@ -18,8 +18,8 @@ pub fn default_keymap() -> KeyMap {
     m.insert((KeyCode::Up, KeyModifiers::NONE), MoveUp);
     m.insert((KeyCode::Down, KeyModifiers::NONE), MoveDown);
 
-    // Inspect endpoint
-    m.insert((KeyCode::Char('i'), KeyModifiers::NONE), Inspect);
+    // Toggle Inspector Pane
+    m.insert((KeyCode::Char('i'), KeyModifiers::NONE), ToggleInspect);
 
     // Sorting
     m.insert((KeyCode::Char('s'), KeyModifiers::NONE), CycleSort);

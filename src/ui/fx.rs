@@ -18,6 +18,7 @@ impl FxManager {
     }
 
     pub fn trigger_startup(&mut self) {
+        // Default slide_in animation I found on tachyonfx-ftl
         let c = Color::from_u32(0x1d2021);
         let timer = (1000, Interpolation::Linear);
         let fx = fx::slide_in(Motion::UpToDown, 10, 0, c, timer);

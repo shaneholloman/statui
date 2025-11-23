@@ -12,12 +12,19 @@ use crate::{
 
 const MAX_LATENCY_HISTORY: usize = 100;
 
+#[derive(PartialEq, Eq)]
+pub enum AppMode {
+    Normal,
+    Inspecting,
+}
+
 pub struct App {
     // TODO: might have to refactor into a separate AppState
     // struct if it gets too big
     pub endpoint_order: Vec<String>,
     pub endpoint_states: HashMap<String, EndpointState>,
     pub table_state: TableState,
+    pub mode: AppMode,
 }
 
 impl App {
@@ -32,6 +39,10 @@ impl App {
             let endpoint_state = EndpointState {
                 name: endpoint.name.clone(),
                 url: endpoint.url.clone(),
+                
+                // TODO: refactor method handling to have a global default
+                // This will require changing backend.rs and config.rs 
+                method: endpoint.method.clone().unwrap_or("GET".to_string()),
 
                 latest_status: None,
                 latest_latency: None,
@@ -46,6 +57,7 @@ impl App {
             endpoint_order,
             endpoint_states,
             table_state,
+            mode: AppMode::Normal,
         }
     }
 
@@ -99,6 +111,13 @@ impl App {
         };
         self.table_state.select(Some(i));
     }
+
+    pub fn toggle_inspect(&mut self) {
+        match self.mode {
+            AppMode::Normal => self.mode = AppMode::Inspecting,
+            AppMode::Inspecting => self.mode = AppMode::Normal,
+        };
+    }
 }
 
 /// The state of an Endpoint
@@ -107,6 +126,7 @@ impl App {
 pub struct EndpointState {
     pub name: String,
     pub url: String,
+    pub method: String,
 
     pub latest_status: Option<CheckStatus>,
     pub latest_latency: Option<Duration>,

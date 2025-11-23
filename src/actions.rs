@@ -5,7 +5,7 @@ pub enum Action {
     Quit,
     MoveUp,
     MoveDown,
-    Inspect,
+    ToggleInspect,
     CycleSort,
     ToggleSortDirection,
     Search,
@@ -28,8 +28,8 @@ pub fn handle_action(action: &Action, app: &mut App) -> bool {
             app.previous_row();
         }
         // TODO: Implement the following functions
-        Inspect => {
-            return false;
+        ToggleInspect => {
+            app.toggle_inspect();
         }
         CycleSort => {
             return false;

@@ -2,7 +2,7 @@ use ratatui::{
     layout::Constraint,
     prelude::*,
     symbols,
-    widgets::{Block, Borders, Cell, Paragraph, Row, Table},
+    widgets::{Block, Cell, Row, Table},
 };
 
 use crate::backend::CheckStatus;
@@ -11,14 +11,14 @@ use crate::state::App;
 const SPARKLINE_LENGTH: usize = 10;
 
 // TODO: Improve how the table looks in general and make it interactive
-pub fn render_table(frame: &mut Frame, app: &mut App) {
-    let rows = create_rows(&app);
-
+pub fn render_table(frame: &mut Frame, app: &mut App, chunk: Rect) {
     let header = ["NAME", "STATUS", "LATENCY", "TREND"]
         .into_iter()
         .map(Cell::from)
         .collect::<Row>()
         .height(1);
+    
+    let rows = create_rows(&app);
 
     let widths = vec![
         Constraint::Min(10),
@@ -42,8 +42,7 @@ pub fn render_table(frame: &mut Frame, app: &mut App) {
         .highlight_symbol(">> ")
         .row_highlight_style(Style::default().add_modifier(Modifier::REVERSED));
 
-    frame.render_stateful_widget(table, frame.area(), &mut app.table_state);
-
+    frame.render_stateful_widget(table, chunk, &mut app.table_state);
 }
 
 /// Return the endpoints as a vector of Rows to build the table.
@@ -70,6 +69,8 @@ fn create_rows(app: &App) -> Vec<Row<'static>> {
         };
         let latency_message = format!("{}ms", latency.as_millis());
 
+        // Take the last 'SPARKLINE_LENGTH' data points from the latency_history
+        // and create a sparkline string.
         let latency_length = state.latency_history.len();
         let start = latency_length.saturating_sub(SPARKLINE_LENGTH);
         let latency_slice: Vec<u64> = state.latency_history.iter().skip(start).copied().collect();
@@ -86,48 +87,6 @@ fn create_rows(app: &App) -> Vec<Row<'static>> {
         );
     }
     rows
-}
-
-/// Helper function to show a welcome/help message
-pub fn render_welcome_message(frame: &mut Frame) {
-    let text = vec![
-        Line::from("Welcome to Statui!").style(Style::default().bold()),
-        Line::from(""), // Empty line
-        Line::from("No endpoints are loaded."),
-        Line::from("Please create a 'statui.toml' file in this directory"),
-        Line::from("and add your endpoints to it."),
-        Line::from(""),
-        Line::from("Press 'q' to quit."),
-    ];
-
-    let paragraph = Paragraph::new(text)
-        .block(Block::default().title("Welcome").borders(Borders::ALL))
-        .alignment(Alignment::Center); 
-
-    // We need to calculate a centered area to render this
-    let area = centered_rect(60, 50, frame.area());
-    frame.render_widget(paragraph, area);
-}
-
-/// Helper function to create a centered rectangle
-fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
-    let popup_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage((100 - percent_y) / 2),
-            Constraint::Percentage(percent_y),
-            Constraint::Percentage((100 - percent_y) / 2),
-        ])
-        .split(r);
-
-    Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage((100 - percent_x) / 2),
-            Constraint::Percentage(percent_x),
-            Constraint::Percentage((100 - percent_x) / 2),
-        ])
-        .split(popup_layout[1])[1]
 }
 
 /// Helper function to create sparkline strings
