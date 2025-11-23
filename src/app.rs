@@ -1,29 +1,27 @@
 use color_eyre::Result;
-use std::{
-    time::Duration,
-};
+use std::time::Duration;
 
 use ratatui::{
-    crossterm::event::{self, Event, KeyCode},
-    backend::Backend,
     Terminal,
+    backend::Backend,
+    crossterm::event::{self, Event, KeyCode},
 };
 
 use tokio::sync::mpsc::Receiver;
 
+use crate::backend::CheckResult;
 use crate::{state::App, ui};
-use crate::{backend::CheckResult};
 
 /// TUI entry point that handles drawing the ui, handling input, and displaying
 /// results of a check.
 pub async fn run_app(
-    app: &mut App,
+    mut app: &mut App,
     terminal: &mut Terminal<impl Backend>,
     mut rx: Receiver<CheckResult>,
 ) -> Result<()> {
     loop {
         // 1. Draw the UI
-        terminal.draw(|f| ui::render_ui(f, &app))?;
+        terminal.draw(|f| ui::render_ui(f, &mut app))?;
 
         // 2. Handle input
         // Simple input handling to quit on q
@@ -31,9 +29,12 @@ pub async fn run_app(
         // to handle all types of key inputs
         if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
-                if key.code == KeyCode::Char('q') {
+                match key.code {
                     // 'q' was pressed, so we quit
-                    return Ok(());
+                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Char('k') => app.previous_row(),
+                    KeyCode::Char('j') => app.next_row(),
+                    _ => continue,
                 }
             }
         }

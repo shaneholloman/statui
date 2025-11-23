@@ -1,14 +1,17 @@
 use ratatui::{
     layout::Constraint,
     prelude::*,
+    symbols,
     widgets::{Block, Borders, Cell, Paragraph, Row, Table},
 };
 
-use crate::state::App;
 use crate::backend::CheckStatus;
+use crate::state::App;
+
+const SPARKLINE_LENGTH: usize = 10;
 
 // TODO: Improve how the table looks in general and make it interactive
-pub fn render_table(frame: &mut Frame, app: &App) {
+pub fn render_table(frame: &mut Frame, app: &mut App) {
     let rows = create_rows(&app);
 
     let header = ["NAME", "STATUS", "LATENCY", "TREND"]
@@ -25,21 +28,28 @@ pub fn render_table(frame: &mut Frame, app: &App) {
     ];
 
     // TODO: Make a better header
-    let table = Table::new(rows, widths).header(header).block(
-        Block::bordered()
-            .title(
-                Line::from("Statui ")
-                    .left_aligned()
-                    .style(Style::new().blue().italic()),
-            )
-            .border_set(symbols::border::DOUBLE),
-    );
+    let table = Table::new(rows, widths)
+        .header(header)
+        .block(
+            Block::bordered()
+                .title(
+                    Line::from("Statui ")
+                        .left_aligned()
+                        .style(Style::new().blue().italic()),
+                )
+                .border_set(symbols::border::DOUBLE),
+        )
+        .highlight_symbol(">> ")
+        .row_highlight_style(Style::default().add_modifier(Modifier::REVERSED));
+
     let area = centered_rect(99, 99, frame.area());
-    frame.render_widget(table, area);
+
+    frame.render_stateful_widget(table, area, &mut app.table_state);
+
 }
 
 /// Return the endpoints as a vector of Rows to build the table.
-fn create_rows(app: &App) -> Vec<Row<'_>> {
+fn create_rows(app: &App) -> Vec<Row<'static>> {
     let mut rows: Vec<Row> = Vec::new();
     for endpoint_name in &app.endpoint_order {
         let Some(state) = app.endpoint_states.get(endpoint_name) else {
@@ -62,11 +72,20 @@ fn create_rows(app: &App) -> Vec<Row<'_>> {
         };
         let latency_message = format!("{}ms", latency.as_millis());
 
-        rows.push(Row::new(vec![
-            state.name.clone(),
-            status_message,
-            latency_message,
-        ]));
+        let latency_length = state.latency_history.len();
+        let start = latency_length.saturating_sub(SPARKLINE_LENGTH);
+        let latency_slice: Vec<u64> = state.latency_history.iter().skip(start).copied().collect();
+        let sparkline = generate_sparkline_string(&latency_slice);
+
+        rows.push(
+            Row::new(vec![
+                Cell::from(state.name.clone()),
+                Cell::from(status_message),
+                Cell::from(latency_message),
+                Cell::from(sparkline),
+            ])
+            .height(1),
+        );
     }
     rows
 }
@@ -111,4 +130,34 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             Constraint::Percentage((100 - percent_x) / 2),
         ])
         .split(popup_layout[1])[1]
+}
+
+/// Helper function to create sparkline strings
+fn generate_sparkline_string(data: &[u64]) -> String {
+    if data.is_empty() {
+        return String::from(" ");
+    }
+
+    let max = data.iter().max().copied().unwrap_or(1).max(1);
+
+    // We define the symbols manually here.
+    // 0 = Empty, 8 = Full
+    let bars = [" ", " ", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
+
+    data.iter()
+        .map(|&value| {
+            if value == 0 {
+                return bars[0];
+            }
+
+            // Calculate ratio (0.0 to 1.0)
+            let ratio = value as f64 / max as f64;
+
+            // Map 0.0-1.0 to index 0-8
+            let index = (ratio * 8.0).round() as usize;
+
+            // Clamp index to max 8 to prevent crashes
+            bars[index.min(8)]
+        })
+        .collect()
 }

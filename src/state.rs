@@ -1,6 +1,14 @@
-use std::{collections::{HashMap, VecDeque}, time::Duration};
+use std::{
+    collections::{HashMap, VecDeque},
+    time::Duration,
+};
 
-use crate::{backend::{CheckResult, CheckStatus}, config::Endpoint};
+use ratatui::widgets::TableState;
+
+use crate::{
+    backend::{CheckResult, CheckStatus},
+    config::Endpoint,
+};
 
 const MAX_LATENCY_HISTORY: usize = 100;
 
@@ -9,12 +17,16 @@ pub struct App {
     // struct if it gets too big
     pub endpoint_order: Vec<String>,
     pub endpoint_states: HashMap<String, EndpointState>,
+    pub table_state: TableState,
 }
 
 impl App {
     pub fn new(endpoints: &Vec<Endpoint>) -> Self {
         let mut endpoint_order = Vec::new();
         let mut endpoint_states = HashMap::new();
+        let mut table_state = TableState::default();
+        
+        table_state.select(Some(0));
 
         for endpoint in endpoints {
             let endpoint_state = EndpointState {
@@ -33,6 +45,7 @@ impl App {
         Self {
             endpoint_order,
             endpoint_states,
+            table_state,
         }
     }
 
@@ -49,6 +62,38 @@ impl App {
                 state.latency_history.pop_front();
             }
         }
+    }
+
+    pub fn next_row(&mut self) {
+        if self.endpoint_order.is_empty() { return; }
+
+        let i = match self.table_state.selected() {
+            Some(i) => {
+                if i >= self.endpoint_order.len() - 1 {
+                    0 // Wrap around to top
+                } else {
+                    i + 1
+                }
+            }
+            None => 0,
+        };
+        self.table_state.select(Some(i));
+    }
+
+    pub fn previous_row(&mut self) {
+        if self.endpoint_order.is_empty() { return; }
+
+        let i = match self.table_state.selected() {
+            Some(i) => {
+                if i == 0 {
+                    self.endpoint_order.len() - 1 // Wrap around to bottom
+                } else {
+                    i - 1
+                }
+            }
+            None => 0,
+        };
+        self.table_state.select(Some(i));
     }
 }
 
