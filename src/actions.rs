@@ -1,4 +1,7 @@
-use crate::state::App;
+use crate::{
+    state::App,
+    ui::fx::FxManager,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Action {
@@ -14,7 +17,10 @@ pub enum Action {
 
 /// Returns true if the action is 'Quit', returns false and
 /// handles the action otherwise.
-pub fn handle_action(action: &Action, app: &mut App) -> bool {
+/// 
+/// 'EffectManager' is being passed right now for possible future animation extensibility.
+/// I tried it on inspector but it got a bit dizzying to have it run every time.
+pub fn handle_action(action: &Action, app: &mut App, _fx_manager: &mut FxManager) -> bool {
     use Action::*;
 
     match action {
@@ -30,6 +36,12 @@ pub fn handle_action(action: &Action, app: &mut App) -> bool {
         // TODO: Implement the following functions
         ToggleInspect => {
             app.toggle_inspect();
+
+            // Uncomment for slide in animation to be added every time
+            // the inspector is opened
+            // if app.mode == AppMode::Inspecting {
+            //     fx_manager.trigger_inspector_slide_in();
+            // }
         }
         CycleSort => {
             return false;

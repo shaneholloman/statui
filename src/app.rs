@@ -29,6 +29,9 @@ pub async fn run_app(
     let mut fx_manager = FxManager::new();
     fx_manager.trigger_startup();
 
+    // I'll run the inspector open animation only first time it opens for now
+    fx_manager.trigger_open_inspector();
+
     let mut last_frame = Instant::now();
     loop {
         let elapsed = last_frame.elapsed();
@@ -36,8 +39,8 @@ pub async fn run_app(
 
         // 1. Draw the UI
         terminal.draw(|frame| {
-            ui::render_ui(frame, &mut app);
-            fx_manager.render(frame, frame.area(), elapsed.into());
+            ui::render_ui(frame, &mut app, &mut fx_manager, elapsed);
+            fx_manager.render_global(frame, frame.area(), elapsed.into());
         })?;
 
         // 2. Handle input
@@ -49,7 +52,7 @@ pub async fn run_app(
                 };
 
                 // Exit if true is returned
-                if handle_action(&action, &mut app) {
+                if handle_action(&action, &mut app, &mut fx_manager) {
                     return eyre::Ok(());
                 };
             }

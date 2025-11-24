@@ -5,8 +5,8 @@ use ratatui::{
     widgets::{Block, Cell, Row, Table},
 };
 
-use crate::backend::CheckStatus;
 use crate::state::App;
+use crate::{backend::CheckStatus, ui::theme::Theme};
 
 const SPARKLINE_LENGTH: usize = 10;
 
@@ -15,9 +15,10 @@ pub fn render_table(frame: &mut Frame, app: &mut App, chunk: Rect) {
     let header = ["NAME", "STATUS", "LATENCY", "TREND"]
         .into_iter()
         .map(Cell::from)
+        .map(|cell| cell.add_modifier(Modifier::BOLD))
         .collect::<Row>()
         .height(1);
-    
+
     let rows = create_rows(&app);
 
     let widths = vec![
@@ -35,12 +36,13 @@ pub fn render_table(frame: &mut Frame, app: &mut App, chunk: Rect) {
                 .title(
                     Line::from("Statui ")
                         .left_aligned()
-                        .style(Style::new().blue().italic()),
+                        .style(Theme::table_header()),
                 )
-                .border_set(symbols::border::DOUBLE),
+                .border_set(symbols::border::DOUBLE)
+                .border_style(Theme::table_border()),
         )
-        .highlight_symbol(">> ")
-        .row_highlight_style(Style::default().add_modifier(Modifier::REVERSED));
+        .highlight_symbol(Theme::HIGHLIGHT_SYMBOL)
+        .row_highlight_style(Theme::table_highlight());
 
     frame.render_stateful_widget(table, chunk, &mut app.table_state);
 }
@@ -63,11 +65,17 @@ fn create_rows(app: &App) -> Vec<Row<'static>> {
 
         // If we reach this point, we are guaranteed to have
         // 'state', 'status', and 'latency' so we add them to the Rows.
-        let status_message = match status {
-            CheckStatus::Success { code, text } => format!("{} {}", code, text),
-            CheckStatus::Error { message } => format!("Error {}", message),
+        let (status_message, status_color) = match status {
+            CheckStatus::Success { code, text } => {
+                let color = Theme::color_code(code);
+
+                (format!("{} {}", code, text), color)
+            }
+            CheckStatus::Error { message } => (format!("Error {}", message), Theme::STATUS_ERROR),
         };
+
         let latency_message = format!("{}ms", latency.as_millis());
+        let latency_color = Theme::latency_color(latency);
 
         // Take the last 'SPARKLINE_LENGTH' data points from the latency_history
         // and create a sparkline string.
@@ -79,8 +87,8 @@ fn create_rows(app: &App) -> Vec<Row<'static>> {
         rows.push(
             Row::new(vec![
                 Cell::from(state.name.clone()),
-                Cell::from(status_message),
-                Cell::from(latency_message),
+                Cell::from(status_message).fg(status_color),
+                Cell::from(latency_message).fg(latency_color),
                 Cell::from(sparkline),
             ])
             .height(1),
@@ -127,3 +135,4 @@ fn generate_sparkline_string(data: &[u64]) -> String {
         })
         .collect()
 }
+

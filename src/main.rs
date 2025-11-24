@@ -20,7 +20,6 @@ async fn main() -> Result<()> {
     color_eyre::install()?;
     let conf = load_config().unwrap();
 
-    // println!("{:#?}", conf);
     let (tx, rx): (Sender<CheckResult>, Receiver<CheckResult>) = mpsc::channel(RESULT_BUFFER_SIZE);
 
     let conf_clone = conf.clone();

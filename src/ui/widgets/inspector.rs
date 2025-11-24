@@ -1,16 +1,20 @@
 use ratatui::{
     Frame,
     layout::Rect,
-    style::{Style, Stylize},
+    style::{Color, Style, Stylize},
     symbols,
     text::Line,
     widgets::{Block, Paragraph, Wrap},
 };
 
-use crate::state::{App, EndpointState};
+use crate::{backend::CheckStatus, state::{App, EndpointState}, ui::theme::Theme};
 
 pub fn render_inspector(frame: &mut Frame, app: &mut App, chunk: Rect) {
     let Some(selected) = app.table_state.selected() else {
+        // if no endpoint is selected in the table render an empty 
+        // inspector with title "Pick an endpoint"
+        let empty_inspector = create_title_block("Pick an endpoint", Theme::BORDER_UNFOCUSED);
+        frame.render_widget(empty_inspector, chunk);
         return;
     };
 
@@ -22,14 +26,13 @@ pub fn render_inspector(frame: &mut Frame, app: &mut App, chunk: Rect) {
         return;
     };
 
-    let title_block = Block::bordered()
-        .title(
-            Line::from(format!("Inspector: {}", endpoint_name))
-                .left_aligned()
-                .style(Style::new().red().italic()),
-        )
-        .border_set(symbols::border::DOUBLE)
-        .border_style(Style::new().yellow());
+    let border_color = match &endpoint_state.latest_status {
+        Some(CheckStatus::Success { code, .. }) => Theme::color_code(code),
+        Some(CheckStatus::Error { .. }) => Theme::STATUS_ERROR,
+        None => Theme::BORDER_UNFOCUSED,
+    };
+
+    let title_block = create_title_block(endpoint_name, border_color);
 
     let par = Paragraph::new(create_lines(endpoint_state))
         .block(title_block)
@@ -47,4 +50,15 @@ fn create_lines(endpoint_state: &EndpointState) -> Vec<Line<'static>> {
         Line::from(""),
         Line::from(""),
     ]
+}
+
+fn create_title_block(endpoint_name: &str, status_color: Color) -> Block<'static> {
+    Block::bordered()
+        .title(
+            Line::from(format!("Inspector: {}", endpoint_name))
+                .left_aligned()
+                .style(Style::new().fg(status_color).bold().italic()),
+        )
+        .border_set(symbols::border::DOUBLE)
+        .border_style(status_color)
 }

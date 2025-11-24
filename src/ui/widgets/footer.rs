@@ -1,10 +1,11 @@
 use ratatui::{
     Frame,
     layout::{Alignment, Rect},
-    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
 };
+
+use crate::ui::theme::Theme;
 
 pub fn render_footer(frame: &mut Frame, area: Rect) {
     let controls = [
@@ -25,13 +26,13 @@ pub fn render_footer(frame: &mut Frame, area: Rect) {
                 // Key: Black text on Cyan background 
                 Span::styled(
                     key_text,
-                    Style::default().fg(Color::Black).bg(Color::Cyan).add_modifier(Modifier::BOLD),
+                    Theme::footer_keys(),
                 ),
 
                 // Description: Dark Gray text on the default background
                 Span::styled(
                     desc_text,
-                    Style::default().fg(Color::DarkGray).bg(Color::Reset),
+                    Theme::footer_desc(),
                 ),
                 // A Spacer 
                 Span::from(" "),

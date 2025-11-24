@@ -1,19 +1,30 @@
 pub mod fx;
 mod util;
 mod widgets;
+mod theme;
 
-use ratatui::prelude::*;
+use ratatui::{
+    Frame,
+    layout::{Constraint, Direction, Layout},
+};
+use std::time::Duration;
 
-use crate::state::{App, AppMode};
+use crate::{
+    state::{App, AppMode},
+    ui::fx::FxManager,
+};
 use widgets::{
-    footer::render_footer, 
-    inspector::render_inspector,
-    table::render_table,
+    footer::render_footer, inspector::render_inspector, table::render_table,
     welcome::render_welcome_message,
 };
 
 /// Renders the UI widgets for the application.
-pub fn render_ui(frame: &mut Frame, mut app: &mut App) {
+pub fn render_ui(
+    frame: &mut Frame,
+    mut app: &mut App,
+    fx_manager: &mut FxManager,
+    elapsed: Duration,
+) {
     if app.endpoint_order.is_empty() {
         render_welcome_message(frame);
         return;
@@ -41,6 +52,7 @@ pub fn render_ui(frame: &mut Frame, mut app: &mut App) {
 
     if app.mode == AppMode::Inspecting {
         render_inspector(frame, &mut app, chunks[1]);
+        fx_manager.render_inspector(frame, chunks[1], elapsed.into());
     }
 
     render_footer(frame, footer_area);
