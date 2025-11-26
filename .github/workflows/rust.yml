@@ -1,10 +1,11 @@
 name: Build Release
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Version Tag (e.g. v0.1.0)'
+        required: false
+        default: 'manual-build'
 
 env:
   CARGO_TERM_COLOR: always
