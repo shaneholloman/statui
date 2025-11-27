@@ -21,8 +21,12 @@ impl Theme {
     // Borders
     pub const BORDER_UNFOCUSED: Color = Color::DarkGray;
     pub const BORDER_FOCUSED: Color = Color::Cyan;
+
     pub const PANEL_BORDER: border::Set = border::DOUBLE;
     pub const TITLE_BRACKETS: [&str; 2] = ["|", "|"];
+
+    // pub const PANEL_BORDER: border::Set = border::ROUNDED;
+    // pub const TITLE_BRACKETS: [&str; 2] = ["┤", "├"];
 
     // Table
     pub fn table_header() -> Style {

@@ -6,7 +6,7 @@ use ratatui::{
 
 use crate::{backend::CheckStatus, ui::theme::Theme};
 
-/// Helper function to create a centered rectangle
+/// Helper function to create a centered rectangle 
 pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -57,7 +57,7 @@ pub fn wrap_with_brackets(title: &str, title_style: Style, bracket_style: Style)
     ])
 }
 
-/// Helper
+/// Helper function to get the color for a given status based on the code.
 pub fn get_status_color(status: &Option<CheckStatus>) -> Color {
     match status {
         Some(CheckStatus::Success { code, .. }) => Theme::color_code(code),

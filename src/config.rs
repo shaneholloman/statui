@@ -70,3 +70,12 @@ pub fn load_config() -> Result<StatuiConfig> {
     let config = builder.build()?.try_deserialize::<StatuiConfig>()?;
     Ok(config)
 }
+
+// Helper function I use in the welcome message to show the user where to put the config file
+pub fn get_default_config_dir() -> String {
+    if let Some(proj_dirs) = ProjectDirs::from(APP_QUALIFIER, APP_ORGANIZATION, APP_NAME) {
+        proj_dirs.config_dir().to_string_lossy().to_string()
+    } else {
+        "your system config directory".to_string()
+    }
+}

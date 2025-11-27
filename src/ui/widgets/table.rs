@@ -8,24 +8,30 @@ use ratatui::{
 use crate::{backend::CheckStatus, ui::theme::Theme};
 use crate::{state::App, ui::util};
 
-const SPARKLINE_LENGTH: usize = 10;
+const SPARKLINE_LENGTH: usize = 20;
 
 // TODO: Improve how the table looks in general and make it interactive
 pub fn render_table(frame: &mut Frame, app: &mut App, chunk: Rect) {
-    let header = ["NAME", "STATUS", "LATENCY", "TREND"]
-        .into_iter()
-        .map(Cell::from)
-        .map(|cell| cell.add_modifier(Modifier::BOLD))
-        .collect::<Row>()
-        .bottom_margin(1);
+    let header = Row::new(vec![
+        Line::from("NAME").centered(),
+        Line::from("STATUS").centered(),
+        Line::from("LATENCY").centered(),
+        Line::from("TREND").centered(),
+    ])
+    .style(
+        Style::default()
+            .fg(Theme::BORDER_FOCUSED)
+            .add_modifier(Modifier::BOLD)
+            .add_modifier(Modifier::UNDERLINED),
+    );
 
     let rows = create_rows(&app);
 
     let widths = vec![
-        Constraint::Percentage(35),
+        Constraint::Percentage(30),
         Constraint::Percentage(25),
         Constraint::Percentage(15),
-        Constraint::Percentage(25),
+        Constraint::Percentage(30),
     ];
 
     let title =
@@ -66,14 +72,17 @@ fn create_rows(app: &App) -> Vec<Row<'static>> {
         };
 
         // If we reach this point, we are guaranteed to have
-        // 'state', 'status', and 'latency' so we add them to the Rows.
+        // 'state', 'status', and 'latency' so we build up our rows.
+        // Create an appropriate status message and get its color.
         let (status_message, status_color) = match status {
             CheckStatus::Success { code, text } => {
                 let color = Theme::color_code(code);
-
-                (format!("{} {}", code, text), color)
+                let raw_text = format!("{:<3} {}", code, text);
+                // {:<15} adds padding to the status message so center alignment
+                // doesn't break.
+                (format!("{:<15}", raw_text), color)
             }
-            CheckStatus::Error { message } => (format!("Error {}", message), Theme::STATUS_ERROR),
+            CheckStatus::Error { message } => (format!("ERR {:<11}", message), Theme::STATUS_ERROR),
         };
 
         let latency_message = format!("{}ms", latency.as_millis());
@@ -97,8 +106,10 @@ fn create_rows(app: &App) -> Vec<Row<'static>> {
         rows.push(
             Row::new(vec![
                 Cell::from(state.name.clone()).style(cell_style),
-                Cell::from(status_message).style(cell_style.fg(status_color)),
-                Cell::from(latency_message).style(cell_style.fg(latency_color)),
+                Cell::from(Line::from(status_message).centered())
+                    .style(cell_style.fg(status_color)),
+                Cell::from(Line::from(latency_message).centered())
+                    .style(cell_style.fg(latency_color)),
                 Cell::from(sparkline).fg(latency_color),
             ])
             .height(1),
@@ -115,8 +126,8 @@ fn generate_sparkline_string(data: &[u64]) -> String {
 
     let max = data.iter().max().copied().unwrap_or(1).max(1);
 
-    // Only using 7 out of 8 levels here so there's a small gap between
-    // the sparklines in the rows.
+    // Only using 7 out of 9 levels here so there's a small gap between
+    // the sparklines in the rows I don't want empty levels.
     const N_LEVELS: usize = 7;
 
     // We define the symbols manually here.

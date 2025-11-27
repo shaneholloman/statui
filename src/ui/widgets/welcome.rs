@@ -1,29 +1,77 @@
 use ratatui::{
     Frame,
     layout::Alignment,
-    style::{Style, Stylize},
-    text::Line,
+    style::{Color, Modifier, Style},
+    text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
 };
 
-use crate::ui::util;
+use crate::{
+    config,
+    ui::{theme::Theme, util},
+};
 
 pub fn render_welcome_message(frame: &mut Frame) {
     let text = vec![
-        Line::from("Welcome to Statui!").style(Style::default().bold()),
+        Line::from("Welcome to Statui!").style(
+            Style::default()
+                .fg(Theme::BORDER_FOCUSED)
+                .add_modifier(Modifier::BOLD),
+        ),
         Line::from(""),
-        Line::from("No endpoints are loaded."),
-        Line::from("Please create a 'statui.toml' file in this directory"),
-        Line::from("and add your endpoints to it."),
+        Line::from("No endpoints loaded."),
         Line::from(""),
-        Line::from("Press 'q' to quit."),
+        Line::from(vec![
+            Span::raw("To get started, create a "),
+            Span::styled(
+                "statui.toml",
+                Style::default()
+                    .fg(Theme::BORDER_FOCUSED)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(" file in this directory,"),
+        ]),
+        // The Solution (Global)
+        Line::from(vec![
+            Span::raw("or a "),
+            Span::styled(
+                "config.toml",
+                Style::default()
+                    .fg(Theme::BORDER_FOCUSED)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(" file in your app config folder:"),
+        ]),
+        Line::from(Span::styled(
+            config::get_default_config_dir(),
+            Style::default().fg(Theme::DESC_FG),
+        )),
+        Line::from(""),
+        Line::from("Add your endpoints to the file and restart the app."),
+        Line::from(""),
+        Line::from(vec![
+            Span::raw("Press "),
+            Span::styled(
+                "q",
+                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(" to quit."),
+        ]),
     ];
+    let h = text.len() as u16;
+    let w = text.iter().map(|line| line.width()).max().unwrap_or(0) as u16;
+
+    let outer_border = Block::default()
+        .title("Welcome")
+        .borders(Borders::ALL)
+        .border_style(Theme::table_border_style());
 
     let paragraph = Paragraph::new(text)
-        .block(Block::default().title("Welcome").borders(Borders::ALL))
+        .block(Block::default())
         .alignment(Alignment::Center);
 
-    // We need to calculate a centered area to render this
-    let area = util::centered_rect(60, 50, frame.area());
-    frame.render_widget(paragraph, area);
+    let popup_area = util::centered_rect(70, 60, frame.area());
+    let text_area = util::centered_area(h + 2, w + 2, popup_area);
+    frame.render_widget(outer_border, popup_area);
+    frame.render_widget(paragraph, text_area);
 }
