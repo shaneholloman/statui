@@ -2,7 +2,7 @@ use ratatui::{
     Frame,
     layout::{Alignment, Rect},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Paragraph},
 };
 
 use crate::ui::theme::Theme;
@@ -35,7 +35,7 @@ pub fn render_footer(frame: &mut Frame, area: Rect) {
 
     let footer = Paragraph::new(Line::from(spans))
         .alignment(Alignment::Left)
-        .block(Block::default().borders(Borders::TOP));
+        .block(Block::default());
 
     frame.render_widget(footer, area);
 }

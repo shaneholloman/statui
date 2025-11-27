@@ -32,7 +32,7 @@ pub fn render_ui(
 
     let root = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(0), Constraint::Length(2)])
+        .constraints([Constraint::Min(0), Constraint::Length(1)])
         .split(frame.area());
 
     let workspace_area = root[0];
