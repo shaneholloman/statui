@@ -6,11 +6,13 @@ mod keymap;
 mod state;
 mod ui;
 
+use std::{env, process};
+
 use color_eyre::Result;
 use tokio::sync::mpsc::{self, Receiver, Sender};
 
 use crate::backend::CheckResult;
-use crate::config::load_config;
+use crate::config::StatuiConfig;
 use crate::state::App;
 
 const RESULT_BUFFER_SIZE: usize = 100;
@@ -18,7 +20,11 @@ const RESULT_BUFFER_SIZE: usize = 100;
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
-    let conf = load_config().unwrap();
+
+    let conf = StatuiConfig::build(env::args()).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
     let (tx, rx): (Sender<CheckResult>, Receiver<CheckResult>) = mpsc::channel(RESULT_BUFFER_SIZE);
 

@@ -3,7 +3,7 @@ use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Paragraph, Wrap},
+    widgets::{Block, Paragraph},
 };
 
 use crate::{
@@ -15,12 +15,9 @@ pub fn render_inspector_header(endpoint_state: &EndpointState, frame: &mut Frame
     let block = Block::new();
     let header_lines = create_header_lines(endpoint_state);
 
-    let inspector_header = Paragraph::new(header_lines)
-        .block(block)
-        .centered()
-        .wrap(Wrap { trim: true });
+    let inspector_header = Paragraph::new(header_lines).block(block).centered();
 
-    frame.render_widget(inspector_header, util::centered_rect(60, 50, area));
+    frame.render_widget(inspector_header, util::centered_rect(90, 50, area));
 }
 
 fn create_header_lines(endpoint_state: &EndpointState) -> Vec<Line<'static>> {

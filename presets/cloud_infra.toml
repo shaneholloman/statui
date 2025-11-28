@@ -1,0 +1,91 @@
+# ==============================================================================
+# PRESET: Cloud & Infrastructure
+# TARGET: DNS Resolvers, AWS, Vercel, Heroku, Fly.io, Supabase
+# ==============================================================================
+
+# -----------------------------------------------
+# statui :: Global Settings
+# -----------------------------------------------
+default_interval = 60
+default_timeout = 5
+
+# -----------------------------------------------
+# statui :: Endpoints
+# -----------------------------------------------
+
+# --- DNS & CONNECTIVITY ---
+
+[[endpoints]]
+name = "Google DNS"
+url = "https://8.8.8.8"
+# Useful for checking general internet connectivity
+
+[[endpoints]]
+name = "Cloudflare DNS"
+url = "https://1.1.1.1"
+
+# [[endpoints]]
+# name = "Cloudflare Trace"
+# url = "https://www.cloudflare.com/cdn-cgi/trace"
+# # Debug info about your connection to Cloudflare edge
+
+# [[endpoints]]
+# name = "OpenDNS"
+# url = "https://208.67.222.222"
+
+# --- MAJOR CLOUDS ---
+
+[[endpoints]]
+name = "AWS Status"
+url = "https://health.aws.amazon.com/health/status"
+# Global AWS health check
+
+[[endpoints]]
+name = "GCP Status"
+url = "https://status.cloud.google.com/incidents.json"
+# Google Cloud Platform incidents
+
+# [[endpoints]]
+# name = "Azure Status"
+# url = "https://status.azure.com/en-us/status"
+# # Note: This is an HTML page, not JSON, but 200 OK means it's up.
+
+[[endpoints]]
+name = "DigitalOcean"
+url = "https://api.digitalocean.com/"
+
+# --- PAAS & SERVERLESS ---
+
+[[endpoints]]
+name = "Vercel Status"
+url = "https://www.vercel-status.com/api/v2/status.json"
+
+[[endpoints]]
+name = "Heroku Status"
+url = "https://status.heroku.com/api/v4/current-status"
+
+[[endpoints]]
+name = "Fly.io Status"
+url = "https://status.flyio.net/api/v2/status.json"
+
+[[endpoints]]
+name = "Railway Status"
+url = "https://status.railway.app/api/v2/status.json"
+
+[[endpoints]]
+name = "Netlify Status"
+url = "https://www.netlifystatus.com/api/v2/status.json"
+
+# --- DATABASE CLOUDS ---
+
+[[endpoints]]
+name = "Supabase Status"
+url = "https://status.supabase.com/api/v2/status.json"
+
+# [[endpoints]]
+# name = "Neon Status"
+# url = "https://status.neon.tech/api/v2/status.json"
+
+# [[endpoints]]
+# name = "PlanetScale"
+# url = "https://www.planetscalestatus.com/api/v2/status.json"

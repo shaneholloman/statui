@@ -9,6 +9,23 @@ const APP_QUALIFIER: &str = "com";
 const APP_ORGANIZATION: &str = "statui";
 const APP_NAME: &str = "statui";
 
+/// The configuration for a single endpoint.
+///
+/// This maps directly to the `[[endpoints]]` block in statui.toml.
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Endpoint {
+    pub name: String,
+    pub url: String,
+
+    // -- Optional Overrides --
+    pub interval: Option<u64>,
+    pub timeout: Option<u64>,
+    pub method: Option<String>,
+
+    #[serde(default)]
+    pub headers: HashMap<String, String>,
+}
+
 /// The full configuration for statui
 ///
 /// Loaded from the file statui.toml or ~/.config/statui/config.toml.
@@ -33,41 +50,33 @@ impl Default for StatuiConfig {
     }
 }
 
-/// The configuration for a single endpoint.
-///
-/// This maps directly to the `[[endpoints]]` block in statui.toml.
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Endpoint {
-    pub name: String,
-    pub url: String,
+impl StatuiConfig {
+    /// Function to build a Configuration by combining the default config,
+    /// the global app config (in ~/.config/statui/config.toml for linux or wherever
+    /// it is for other systems), and the config at the path passed in the first argument
+    /// (if no arguments were passed statui.toml is used by default).
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<StatuiConfig> {
+        args.next();
+        let local_config_path: String = match args.next() {
+            Some(arg) => arg,
+            None => "statui.toml".to_string(),
+        };
 
-    // -- Optional Overrides --
-    pub interval: Option<u64>,
-    pub timeout: Option<u64>,
-    pub method: Option<String>,
+        // default config
+        let mut builder = Config::builder().add_source(Config::try_from(&StatuiConfig::default())?);
 
-    #[serde(default)]
-    pub headers: HashMap<String, String>,
-}
+        if let Some(proj_dirs) = ProjectDirs::from(APP_QUALIFIER, APP_ORGANIZATION, APP_NAME) {
+            // merge global config
+            let global_config_path = proj_dirs.config_dir().join("config.toml");
+            builder = builder.add_source(File::from(global_config_path).required(false));
+        }
 
-/// Function to build a Configuration by combining the default config,
-/// the global app config (in ~/.config/statui/config.toml for linux or wherever
-/// it is for other systems), and the local statui.toml in the current directory.
-pub fn load_config() -> Result<StatuiConfig> {
-    // default config
-    let mut builder = Config::builder().add_source(Config::try_from(&StatuiConfig::default())?);
+        // merge local config
+        builder = builder.add_source(File::from(Path::new(&local_config_path)).required(false));
 
-    if let Some(proj_dirs) = ProjectDirs::from(APP_QUALIFIER, APP_ORGANIZATION, APP_NAME) {
-        // merge global config
-        let global_config_path = proj_dirs.config_dir().join("config.toml");
-        builder = builder.add_source(File::from(global_config_path).required(false));
+        let config = builder.build()?.try_deserialize::<StatuiConfig>()?;
+        Ok(config)
     }
-
-    // merge local config
-    builder = builder.add_source(File::from(Path::new("statui.toml")).required(false));
-
-    let config = builder.build()?.try_deserialize::<StatuiConfig>()?;
-    Ok(config)
 }
 
 // Helper function I use in the welcome message to show the user where to put the config file

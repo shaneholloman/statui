@@ -12,8 +12,8 @@ A lightweight TUI dashboard for API health monitoring built with Rust and Ratatu
 
 # TODO
 
-- [ ] Finish up the statistics and inspector panel.
-- [ ] Make the UI a little prettier.
+- [x] Finish up the statistics and inspector panel.
+- [x] Make the UI a little prettier.
 - [ ] Add search/filter using /
 - [ ] Add API health check presets for various dev tools (LLMs, AI, Package repos).
 - [ ] Create a demo using vhs.

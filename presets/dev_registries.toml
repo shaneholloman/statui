@@ -1,0 +1,88 @@
+# ==============================================================================
+# PRESET: Developer Registries
+# TARGET: Crates.io, PyPI, NPM, Go, Nuget, Packagist
+# ==============================================================================
+
+# -----------------------------------------------
+# statui :: Global Settings
+# -----------------------------------------------
+default_interval = 30
+default_timeout = 5
+
+# -----------------------------------------------
+# statui :: Endpoints
+# -----------------------------------------------
+
+# --- RUST ---
+
+[[endpoints]]
+name = "Crates.io"
+url = "https://crates.io/api/v1/summary"
+# Returns real-time stats for the Rust registry
+
+[[endpoints]]
+name = "Docs.rs"
+url = "https://docs.rs/"
+
+# --- PYTHON ---
+
+[[endpoints]]
+name = "PyPI"
+url = "https://pypi.org/simple/"
+# The root of the Python Package Index
+
+# [[endpoints]]
+# name = "PyPI Stats"
+# url = "https://pypi.org/stats/"
+# # Alternative check if simple/ is slow
+
+# --- JAVASCRIPT ---
+
+[[endpoints]]
+name = "NPM Registry"
+url = "https://registry.npmjs.org/"
+# Returns the JSON root of the Node.js registry
+
+# [[endpoints]]
+# name = "Yarn Mirror"
+# url = "https://registry.yarnpkg.com/"
+# # Alternative registry often used by Yarn
+
+# --- CONTAINERS ---
+
+[[endpoints]]
+name = "Quay.io"
+url = "https://quay.io/api/v1/discovery"
+# Red Hat's container registry
+
+# --- OTHER LANGUAGES ---
+
+[[endpoints]]
+name = "Go Proxy"
+url = "https://proxy.golang.org/"
+# Vital for 'go get' / 'go mod download'
+
+[[endpoints]]
+name = "NuGet (.NET)"
+url = "https://api.nuget.org/v3/index.json"
+# The service index for .NET packages
+
+[[endpoints]]
+name = "Packagist (PHP)"
+url = "https://packagist.org/packages.json"
+# Composer repository
+
+[[endpoints]]
+name = "RubyGems"
+url = "https://rubygems.org/api/v1/gems/rails.json"
+# Checks availability of gem info
+
+[[endpoints]]
+name = "Maven Central"
+url = "https://repo1.maven.org/maven2/"
+# Root of the Java ecosystem
+
+[[endpoints]]
+name = "GitHub API"
+url = "https://api.github.com/zen"
+# A lightweight endpoint that returns a philosophy quote
