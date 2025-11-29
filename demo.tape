@@ -2,13 +2,12 @@
 Output assets/demo.gif
 
 # --- CINEMATIC SETTINGS ---
-Set Width 1425
+Set Width 1400
 Set Height 800
 Set LineHeight 1.2 
 Set Padding 20 
 Set Framerate 60
 Set TypingSpeed 75ms
-
 
 # --- FONT SETUP ---
 Set FontFamily "JetBrains Mono"
@@ -16,6 +15,11 @@ Set FontSize 20
 
 # --- THEME: Catppuccin Mocha ---
 Set Theme "Catppuccin Mocha"
+
+# --- COLOR FIDELITY SETTINGS ---
+# Still looks pale after this for some reason
+Env TERM "xterm-256color"
+Env COLORTERM "truecolor"
 
 # --- SETUP (Hidden) ---
 Hide
@@ -91,6 +95,7 @@ Sleep 700ms
 Type "k"
 Sleep 1s
 
+# Open inspector
 Type "i"
 Sleep 2s 
 
@@ -111,12 +116,14 @@ Type "k"
 Sleep 300ms
 Type "k"
 Sleep 2s
+
+# Close inspector
 Type "i"
 Sleep 1s
 
 # 7. Fade Out
 Type "q"
-Sleep 250ms
+Sleep 700ms
 Type "clear"
 Sleep 500ms
 Enter
