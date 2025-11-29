@@ -1,0 +1,104 @@
+name: Deploy Release
+
+# Trigger the workflow when a tag starting with 'v' is pushed
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+  BINARY_NAME: statui
+
+jobs:
+  build-and-upload:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            # Linux standard: .tar.gz
+            asset_extension: .tar.gz
+            archive_cmd: tar -czvf
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            # Windows standard: .zip
+            asset_extension: .zip
+            archive_cmd: 7z a
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # Linux Musl setup
+      - name: Install musl-tools
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Build Release
+        # --locked ensures dependencies match Cargo.lock exactly
+        run: cargo build --release --locked --verbose --target ${{ matrix.target }}
+
+      # --- PACKAGING STEP ---
+      # Gathers binary, readme, config, and presets into a tidy folder before zipping
+      - name: Package Artifacts
+        shell: bash
+        run: |
+          # 1. Create a staging directory
+          mkdir staging
+          
+          # 2. Copy the binary to staging
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}.exe" staging/
+          else
+            cp "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}" staging/
+          fi
+          
+          # 3. Copy documentation and config
+          cp README.md staging/
+          cp statui.toml staging/ || true
+          
+          # 4. Copy the presets folder (if it exists)
+          if [ -d "presets" ]; then
+            cp -r presets/ staging/presets/
+          fi
+          
+          # 5. Create the Archive
+          # Format: statui-v0.1.0-x86_64-unknown-linux-musl.tar.gz
+          RELEASE_NAME=${{ env.BINARY_NAME }}-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.asset_extension }}
+          
+          cd staging
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            7z a ../$RELEASE_NAME *
+          else
+            tar -czvf ../$RELEASE_NAME *
+          fi
+          cd ..
+          
+          # 6. Save the name for the upload step
+          echo "ASSET_PATH=$RELEASE_NAME" >> $GITHUB_ENV
+
+      # --- UPLOAD STEP ---
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ env.ASSET_PATH }}
