@@ -23,16 +23,32 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # Cache the Rust build to speed up subsequent runs
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+
       - name: Build Release
         run: cargo build --release
 
-      # --- STEP 2: Run VHS ---
+      # --- STEP 2: Install Fonts Manually ---
+      # Fixes the 'unzip' error by downloading specific fonts instead of the huge bundle
+      - name: Install Fonts
+        run: |
+          mkdir -p ~/.local/share/fonts
+          
+          # Install JetBrains Mono 
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/install_manual.sh)"
+          
+          # Refresh font cache
+          fc-cache -fv
+
+      # --- STEP 3: Run VHS ---
       - uses: charmbracelet/vhs-action@v1
         with:
           path: 'demo.tape'
-          install-fonts: true 
+          install-fonts: false # Disable buggy built-in installer
 
-      # --- STEP 3: Commit the Result ---
+      # --- STEP 4: Commit the Result ---
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "docs: update demo.gif"
