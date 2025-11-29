@@ -73,7 +73,7 @@ Type "q"
 Sleep 1.5s
 
 # ==========================================
-# SCENE 2: The CLI & Presets
+# SCENE 2: The CLI & Presets (Cloud)
 # ==========================================
 
 # Clear the screen to signal a new context
@@ -121,7 +121,51 @@ Sleep 2s
 Type "i"
 Sleep 1s
 
-# 7. Fade Out
+# Quit Scene 2
+Type "q"
+Sleep 1.5s
+
+# ==========================================
+# SCENE 3: Dev Registries (Fast Scan)
+# ==========================================
+
+# Clear for final scene
+Type "clear"
+Enter
+Sleep 500ms
+
+# 7. Run with Dev Registries
+Type "statui presets/dev_registries.toml"
+Sleep 1.5s
+Enter
+Sleep 3s
+
+# Fast scroll down (simulating scanning/searching visually)
+Type "i"
+Type 500ms
+Type "j"
+Sleep 200ms
+Type "j"
+Sleep 200ms
+Type "j"
+Sleep 200ms
+Type "j"
+Sleep 200ms
+Sleep 2s
+
+# Move back up to settle on an interesting item (e.g. PyPI or NPM)
+Type "k"
+Sleep 500ms
+Type "k"
+Sleep 500ms
+
+# Inspect
+Type "i"
+Sleep 3s
+Type "i"
+Sleep 1s
+
+# 8. Fade Out / End
 Type "q"
 Sleep 700ms
 Type "clear"
