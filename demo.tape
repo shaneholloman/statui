@@ -142,7 +142,7 @@ Sleep 3s
 
 # Fast scroll down (simulating scanning/searching visually)
 Type "i"
-Type 500ms
+Sleep 500ms
 Type "j"
 Sleep 200ms
 Type "j"
