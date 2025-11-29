@@ -1,0 +1,39 @@
+name: Record Demo
+
+on:
+  # 1. Allow manual triggering via button
+  workflow_dispatch:
+  
+  # 2. Also run automatically if you update the tape file
+  push:
+    branches:
+      - main
+    paths:
+      - 'demo.tape'
+
+jobs:
+  vhs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- STEP 1: Build the App ---
+      # VHS needs the binary to actually run the recording!
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Release
+        run: cargo build --release
+
+      # --- STEP 2: Run VHS ---
+      - uses: charmbracelet/vhs-action@v1
+        with:
+          path: 'demo.tape'
+          install-fonts: true 
+
+      # --- STEP 3: Commit the Result ---
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "docs: update demo.gif"
+          file_pattern: 'assets/*.gif'
