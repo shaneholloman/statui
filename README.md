@@ -63,7 +63,7 @@ cargo install --git https://github.com/Mohamed-Badry/statui statui
 
 ### Option 4: From Github
 
-Open on the releases in the sidebar and install the binary for your device.
+Open the releases in the sidebar and install the binary for your device.
 
 ---
 
