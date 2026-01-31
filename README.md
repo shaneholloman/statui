@@ -113,7 +113,8 @@ Statui uses a layered configuration system. It loads settings in this order (las
 # All endpoints will use these values by default
 
 # Default interval (in seconds) to ping all endpoints
-default_interval = 30
+default_interval = 3    
+# you shouldn't ping your APIs so often this is just for the demo
 
 # Default timeout (in seconds) for any single request
 default_timeout = 5
@@ -137,8 +138,9 @@ url = "https://www.rust-lang.org"
 # -- Optional per-endpoint settings --
 # Uncomment these to override the globals for "Rust Language" only
 interval = 10       # Ping this specific API only every 10 seconds
-timeout = 10        # Give it a longer 10-second timeout
+# timeout = 10      # Give it a longer 10-second timeout
 method = "HEAD"     # Use HTTP HEAD instead of GET to save bandwidth
+# skip_cert_verification = true
 
 [[endpoints]]
 # Failing endpoint (Connection Error)
@@ -147,9 +149,13 @@ url = "https://www.my-non-existent-api.monkey/api"
 
 
 [[endpoints]]
-# Another simple endpoint to fill the table a bit.
 name = "docs.rs"
 url = "https://www.docs.rs"
+
+[[endpoints]]
+name = "BadSSL Self Signed"
+url = "https://self-signed.badssl.com/"
+skip_cert_verification = true
 ```
 
 ---
